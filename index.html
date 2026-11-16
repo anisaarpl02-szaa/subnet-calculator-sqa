@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Subnet IPv4 Modern</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #111827;
+            --surface-card: #1f2937;
+            --surface-hover: #374151;
+            --border: #374151;
+            --border-light: #4b5563;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --text-dim: #6b7280;
+            --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 30%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-main);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .range-wrapper {
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary);
+            cursor: pointer;
+            height: 6px;
+            background: var(--surface-card);
+            border-radius: 3px;
+        }
+
+        .cidr-display {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.12);
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.4rem;
+            font-size: 0.95rem;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .presets-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: center;
+        }
+
+        .preset-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .btn-preset {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.4rem;
+            font-size: 0.78rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-preset:hover {
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border-color: var(--border-light);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        /* Summary Grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.85rem;
+            padding: 1.15rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--border-light);
+        }
+
+        .stat-card.blue::before {
+            background: var(--primary);
+        }
+
+        .stat-card.green::before {
+            background: var(--accent);
+        }
+
+        .stat-card.purple::before {
+            background: var(--accent-purple);
+        }
+
+        .stat-card.amber::before {
+            background: var(--accent-amber);
+        }
+
+        .stat-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-value {
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.35rem;
+        }
+
+        /* Detailed Table */
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .details-table tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .details-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .details-table td {
+            padding: 0.85rem 0.5rem;
+            vertical-align: middle;
+        }
+
+        .details-table td.col-prop {
+            color: var(--text-muted);
+            width: 32%;
+            font-weight: 500;
+        }
+
+        .details-table td.col-val {
+            font-family: var(--font-mono);
+            color: var(--text-main);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .binary-text {
+            color: #93c5fd;
+            font-size: 0.82rem;
+            letter-spacing: 0.02em;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            border-radius: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.15s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--text-main);
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.35rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+        }
+
+        .tag-private {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .tag-public {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .tag-special {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Bit Visualizer */
+        .bit-container {
+            margin-top: 1rem;
+        }
+
+        .bit-legend {
+            display: flex;
+            gap: 1.25rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        .legend-net {
+            background: #3b82f6;
+        }
+
+        .legend-host {
+            background: #374151;
+            border: 1px solid #4b5563;
+        }
+
+        .octet-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .octet-row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .octet-box {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .octet-title {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 0.4rem;
+        }
+
+        .bit-strip {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+        }
+
+        .bit-cell {
+            width: 12px;
+            height: 22px;
+            border-radius: 2px;
+            font-size: 0.65rem;
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .bit-net {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .bit-host {
+            background: #1f2937;
+            color: #9ca3af;
+            border: 1px solid #374151;
+        }
+
+        /* Subnet Division Table */
+        .subnets-list {
+            margin-top: 1rem;
+            overflow-x: auto;
+            max-height: 280px;
+        }
+
+        .subnets-list table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            font-family: var(--font-mono);
+        }
+
+        .subnets-list th {
+            text-align: left;
+            padding: 0.6rem 0.8rem;
+            background: var(--surface-card);
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .subnets-list td {
+            padding: 0.55rem 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        .subnets-list tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #10b981;
+            color: #ffffff;
+            padding: 0.7rem 1.2rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.25s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="badge-tag">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                    <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                    <line x1="6" x2="6.01" y1="6" y2="6" />
+                    <line x1="6" x2="6.01" y1="18" y2="18" />
+                </svg>
+                Networking Utility
+            </div>
+            <h1>Kalkulator Subnet IPv4</h1>
+            <p class="subtitle">Hitung network address, broadcast address, rentang host valid, wildcard mask, dan
+                pemecahan subnet secara instan.</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="color: #60a5fa;">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                        <path d="M2 12h20" />
+                    </svg>
+                    Parameter Jaringan
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="ipInput">Alamat IP (IPv4)</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="ipInput" value="192.168.1.1" placeholder="Contoh: 192.168.1.1"
+                            spellcheck="false" autocomplete="off">
+                    </div>
+                    <div id="ipError" class="error-message">Format IP tidak valid! Harap masukkan format 0.0.0.0 s/d
+                        255.255.255.255</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cidrSelect">Subnet Mask / Prefix (CIDR)</label>
+                    <select id="cidrSelect"></select>
+                    <div class="range-wrapper">
+                        <input type="range" id="cidrRange" min="1" max="32" value="24">
+                        <span id="cidrBadge" class="cidr-display">/24</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preset buttons -->
+            <div class="presets-row">
+                <span class="preset-label">Preset Populer:</span>
+                <button class="btn-preset" onclick="setPreset('192.168.1.1', 24)">192.168.1.1/24 (LAN Standar)</button>
+                <button class="btn-preset" onclick="setPreset('10.0.0.1', 8)">10.0.0.1/8 (Kelas A)</button>
+                <button class="btn-preset" onclick="setPreset('172.16.0.1', 16)">172.16.0.1/16 (Kelas B)</button>
+                <button class="btn-preset" onclick="setPreset('192.168.10.1', 28)">192.168.10.1/28 (Small
+                    Office)</button>
+                <button class="btn-preset" onclick="setPreset('10.254.1.1', 30)">10.254.1.1/30 (PTP Link)</button>
+            </div>
+        </div>
+
+        <!-- Quick Stats Summary -->
+        <div class="summary-grid">
+            <div class="stat-card blue">
+                <div class="stat-title">Network Address</div>
+                <div id="statNetwork" class="stat-value">192.168.1.0</div>
+                <div class="stat-sub">Alamat awal subnet</div>
+            </div>
+
+            <div class="stat-card amber">
+                <div class="stat-title">Broadcast Address</div>
+                <div id="statBroadcast" class="stat-value">192.168.1.255</div>
+                <div class="stat-sub">Alamat broadcast subnet</div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="stat-title">Rentang Host Valid</div>
+                <div id="statHostRange" class="stat-value" style="font-size: 1rem;">192.168.1.1 - 192.168.1.254</div>
+                <div class="stat-sub">IP yang bisa dipakai perangkat</div>
+            </div>
+
+            <div class="stat-card purple">
+                <div class="stat-title">Host Tersedia</div>
+                <div id="statUsableHosts" class="stat-value">254</div>
+                <div id="statTotalHosts" class="stat-sub">Dari total 256 alamat</div>
+            </div>
+        </div>
+
+        <!-- Bit Allocation Visualizer -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="color: #8b5cf6;">
+                        <rect width="18" height="18" x="3" y="3" rx="2" />
+                        <path d="M3 9h18" />
+                        <path d="M9 21V9" />
+                    </svg>
+                    Visualisasi Alokasi 32-Bit
+                </div>
+                <div class="bit-legend">
+                    <div class="legend-item">
+                        <div class="legend-box legend-net"></div>
+                        <span>Network Bits (<span id="netBitsCount">24</span>)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box legend-host"></div>
+                        <span>Host Bits (<span id="hostBitsCount">8</span>)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bit-container">
+                <div class="octet-row" id="octetVisualizer">
+                    <!-- Dynamically rendered octets -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Detailed Technical Table -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="color: #10b981;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" x2="8" y1="13" y2="13" />
+                        <line x1="16" x2="8" y1="17" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    Rincian Lengkap Subnet
+                </div>
+            </div>
+
+            <table class="details-table">
+                <tbody>
+                    <tr>
+                        <td class="col-prop">Alamat IP Masukan</td>
+                        <td class="col-val">
+                            <div>
+                                <span id="detailIp">192.168.1.1</span>
+                                <div id="detailIpBin" class="binary-text">11000000.10101000.00000001.00000001</div>
+                            </div>
+                            <button class="copy-btn" onclick="copyText('detailIp')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Subnet Mask</td>
+                        <td class="col-val">
+                            <div>
+                                <span id="detailMask">255.255.255.0</span>
+                                <div id="detailMaskBin" class="binary-text">11111111.11111111.11111111.00000000</div>
+                            </div>
+                            <button class="copy-btn" onclick="copyText('detailMask')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Wildcard / Inverse Mask</td>
+                        <td class="col-val">
+                            <div>
+                                <span id="detailWildcard">0.0.0.255</span>
+                                <div id="detailWildcardBin" class="binary-text">00000000.00000000.00000000.11111111
+                                </div>
+                            </div>
+                            <button class="copy-btn" onclick="copyText('detailWildcard')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Network ID (CIDR)</td>
+                        <td class="col-val">
+                            <div>
+                                <span id="detailCidrNetwork">192.168.1.0/24</span>
+                                <div id="detailNetworkBin" class="binary-text">11000000.10101000.00000001.00000000</div>
+                            </div>
+                            <button class="copy-btn" onclick="copyText('detailCidrNetwork')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Broadcast ID</td>
+                        <td class="col-val">
+                            <div>
+                                <span id="detailBroadcast">192.168.1.255</span>
+                                <div id="detailBroadcastBin" class="binary-text">11000000.10101000.00000001.11111111
+                                </div>
+                            </div>
+                            <button class="copy-btn" onclick="copyText('detailBroadcast')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Host Pertama yang Dapat Dipakai</td>
+                        <td class="col-val">
+                            <span id="detailFirstHost">192.168.1.1</span>
+                            <button class="copy-btn" onclick="copyText('detailFirstHost')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Host Terakhir yang Dapat Dipakai</td>
+                        <td class="col-val">
+                            <span id="detailLastHost">192.168.1.254</span>
+                            <button class="copy-btn" onclick="copyText('detailLastHost')">Salin</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Kelas IP & Tipe Ruang Alamat</td>
+                        <td class="col-val">
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span id="detailClass">Kelas C</span>
+                                <span id="detailTypeBadge" class="tag tag-private">Private Internet (RFC 1918)</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="col-prop">Representasi Integer & Heksadesimal</td>
+                        <td class="col-val">
+                            <div style="font-size: 0.85rem;">
+                                <span>Int: <strong id="detailInteger">3232235777</strong></span> |
+                                <span>Hex: <strong id="detailHex">0xC0A80101</strong></span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Subnet Division / Subnet Explorer -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" style="color: #f59e0b;">
+                        <path d="M16 3h5v5" />
+                        <path d="M8 3H3v5" />
+                        <path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3" />
+                        <path d="m15 9 6-6" />
+                    </svg>
+                    Daftar Subnet dalam Jaringan Ini
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <label for="subdivideSelect" style="font-size: 0.75rem; margin: 0;">Pecah Jadi:</label>
+                    <select id="subdivideSelect"
+                        style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.8rem;"></select>
+                </div>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                Daftar blok subnet yang dihasilkan saat membagi jaringan ini ke ukuran prefix baru yang lebih spesifik.
+            </p>
+
+            <div class="subnets-list">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Subnet Network</th>
+                            <th>Rentang Host Valid</th>
+                            <th>Broadcast</th>
+                            <th>Host Tersedia</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subnetTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>Kalkulator Subnet IPv4 Modern &bull; Dibuat untuk SysAdmin, Network Engineer, & Pelajar Jaringan</p>
+        </footer>
+    </div>
+
+    <div id="toast">Teks berhasil disalin ke clipboard!</div>
+
+    <script>
+        // Inisialisasi dropdown CIDR
+        const cidrSelect = document.getElementById('cidrSelect');
+        const cidrRange = document.getElementById('cidrRange');
+        const cidrBadge = document.getElementById('cidrBadge');
+        const ipInput = document.getElementById('ipInput');
+        const ipError = document.getElementById('ipError');
+        const subdivideSelect = document.getElementById('subdivideSelect');
+
+        // Buat daftar dropdown CIDR 1 s/d 32
+        function populateCidrOptions() {
+            cidrSelect.innerHTML = '';
+            for (let i = 1; i <= 32; i++) {
+                const mask = cidrToSubnetMask(i);
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `/${i} — ${mask}`;
+                cidrSelect.appendChild(opt);
+            }
+        }
+
+        // Helper konversi CIDR ke Netmask Dotted Decimal
+        function cidrToSubnetMask(cidr) {
+            if (cidr === 0) return "0.0.0.0";
+            const mask = (0xFFFFFFFF << (32 - cidr)) >>> 0;
+            return intToIp(mask);
+        }
+
+        // Konversi IP string ke 32-bit unsigned integer
+        function ipToInt(ip) {
+            return ip.split('.').reduce((acc, octet) => ((acc << 8) + parseInt(octet, 10)) >>> 0, 0);
+        }
+
+        // Konversi 32-bit unsigned integer ke string IP
+        function intToIp(int) {
+            return [
+                (int >>> 24) & 255,
+                (int >>> 16) & 255,
+                (int >>> 8) & 255,
+                int & 255
+            ].join('.');
+        }
+
+        // Format integer ke biner dotted
+        function intToBinaryDotted(int) {
+            const octets = [
+                (int >>> 24) & 255,
+                (int >>> 16) & 255,
+                (int >>> 8) & 255,
+                int & 255
+            ];
+            return octets.map(o => o.toString(2).padStart(8, '0')).join('.');
+        }
+
+        // Validasi format IPv4
+        function isValidIpv4(ip) {
+            const parts = ip.trim().split('.');
+            if (parts.length !== 4) return false;
+            for (const p of parts) {
+                if (!/^\d+$/.test(p)) return false;
+                const n = parseInt(p, 10);
+                if (n < 0 || n > 255 || (p.length > 1 && p.startsWith('0'))) return false;
+            }
+            return true;
+        }
+
+        // Deteksi Kelas & Ruang IP
+        function getIpClassification(ipInt) {
+            const firstOctet = (ipInt >>> 24) & 255;
+            let ipClass = "Kelas A";
+            if (firstOctet >= 128 && firstOctet <= 191) ipClass = "Kelas B";
+            else if (firstOctet >= 192 && firstOctet <= 223) ipClass = "Kelas C";
+            else if (firstOctet >= 224 && firstOctet <= 239) ipClass = "Kelas D (Multicast)";
+            else if (firstOctet >= 240 && firstOctet <= 255) ipClass = "Kelas E (Eksperimental)";
+
+            const octet1 = (ipInt >>> 24) & 255;
+            const octet2 = (ipInt >>> 16) & 255;
+
+            let typeText = "Publik (Global)";
+            let tagClass = "tag-public";
+
+            if (octet1 === 10) {
+                typeText = "Private (RFC 1918)";
+                tagClass = "tag-private";
+            } else if (octet1 === 172 && octet2 >= 16 && octet2 <= 31) {
+                typeText = "Private (RFC 1918)";
+                tagClass = "tag-private";
+            } else if (octet1 === 192 && octet2 === 168) {
+                typeText = "Private (RFC 1918)";
+                tagClass = "tag-private";
+            } else if (octet1 === 127) {
+                typeText = "Loopback (RFC 1122)";
+                tagClass = "tag-special";
+            } else if (octet1 === 169 && octet2 === 254) {
+                typeText = "Link-Local / APIPA (RFC 3927)";
+                tagClass = "tag-special";
+            } else if (octet1 === 100 && octet2 >= 64 && octet2 <= 127) {
+                typeText = "Shared CGNAT (RFC 6598)";
+                tagClass = "tag-special";
+            } else if (firstOctet >= 224 && firstOctet <= 239) {
+                typeText = "Multicast (RFC 5771)";
+                tagClass = "tag-special";
+            } else if (firstOctet >= 240) {
+                typeText = "Reserved / Eksperimental";
+                tagClass = "tag-special";
+            }
+
+            return { ipClass, typeText, tagClass };
+        }
+
+        // Perhitungan Utama Subnet
+        function calculateSubnet() {
+            const ipStr = ipInput.value.trim();
+            const cidr = parseInt(cidrSelect.value, 10);
+
+            if (!isValidIpv4(ipStr)) {
+                ipError.style.display = 'block';
+                return;
+            }
+            ipError.style.display = 'none';
+
+            const ipInt = ipToInt(ipStr);
+            const maskInt = cidr === 0 ? 0 : ((0xFFFFFFFF << (32 - cidr)) >>> 0);
+            const wildcardInt = (~maskInt) >>> 0;
+            const networkInt = (ipInt & maskInt) >>> 0;
+            const broadcastInt = (networkInt | wildcardInt) >>> 0;
+
+            const totalHosts = Math.pow(2, 32 - cidr);
+            let usableHosts = 0;
+            let firstHostInt = networkInt;
+            let lastHostInt = broadcastInt;
+            let rangeStr = "";
+
+            if (cidr === 32) {
+                usableHosts = 1;
+                firstHostInt = networkInt;
+                lastHostInt = networkInt;
+                rangeStr = intToIp(networkInt) + " (Host Tunggal)";
+            } else if (cidr === 31) {
+                // RFC 3021 Point-to-point links
+                usableHosts = 2;
+                firstHostInt = networkInt;
+                lastHostInt = broadcastInt;
+                rangeStr = `${intToIp(firstHostInt)} - ${intToIp(lastHostInt)} (RFC 3021 PTP)`;
+            } else {
+                usableHosts = Math.max(0, totalHosts - 2);
+                firstHostInt = networkInt + 1;
+                lastHostInt = broadcastInt - 1;
+                rangeStr = `${intToIp(firstHostInt)} - ${intToIp(lastHostInt)}`;
+            }
+
+            // Update Stat Cards
+            document.getElementById('statNetwork').textContent = intToIp(networkInt);
+            document.getElementById('statBroadcast').textContent = intToIp(broadcastInt);
+            document.getElementById('statHostRange').textContent = rangeStr;
+            document.getElementById('statUsableHosts').textContent = usableHosts.toLocaleString('id-ID');
+            document.getElementById('statTotalHosts').textContent = `Dari total ${totalHosts.toLocaleString('id-ID')} alamat`;
+
+            // Update Detailed Table
+            document.getElementById('detailIp').textContent = ipStr;
+            document.getElementById('detailIpBin').textContent = intToBinaryDotted(ipInt);
+
+            const maskStr = intToIp(maskInt);
+            document.getElementById('detailMask').textContent = maskStr;
+            document.getElementById('detailMaskBin').textContent = intToBinaryDotted(maskInt);
+
+            document.getElementById('detailWildcard').textContent = intToIp(wildcardInt);
+            document.getElementById('detailWildcardBin').textContent = intToBinaryDotted(wildcardInt);
+
+            document.getElementById('detailCidrNetwork').textContent = `${intToIp(networkInt)}/${cidr}`;
+            document.getElementById('detailNetworkBin').textContent = intToBinaryDotted(networkInt);
+
+            document.getElementById('detailBroadcast').textContent = intToIp(broadcastInt);
+            document.getElementById('detailBroadcastBin').textContent = intToBinaryDotted(broadcastInt);
+
+            document.getElementById('detailFirstHost').textContent = (cidr >= 31) ? intToIp(firstHostInt) : intToIp(firstHostInt);
+            document.getElementById('detailLastHost').textContent = (cidr >= 31) ? intToIp(lastHostInt) : intToIp(lastHostInt);
+
+            // Classification
+            const classification = getIpClassification(ipInt);
+            document.getElementById('detailClass').textContent = classification.ipClass;
+            const tagBadge = document.getElementById('detailTypeBadge');
+            tagBadge.textContent = classification.typeText;
+            tagBadge.className = `tag ${classification.tagClass}`;
+
+            document.getElementById('detailInteger').textContent = ipInt;
+            document.getElementById('detailHex').textContent = '0x' + ipInt.toString(16).toUpperCase().padStart(8, '0');
+
+            // Update 32-bit Visualizer
+            renderBitVisualizer(ipInt, cidr);
+
+            // Update Subnet Subdivider Dropdown & List
+            updateSubdividerOptions(cidr, networkInt);
+        }
+
+        // Visualizer 32-bit (Network vs Host)
+        function renderBitVisualizer(ipInt, cidr) {
+            document.getElementById('netBitsCount').textContent = cidr;
+            document.getElementById('hostBitsCount').textContent = 32 - cidr;
+
+            const octetVisualizer = document.getElementById('octetVisualizer');
+            octetVisualizer.innerHTML = '';
+
+            const octets = [
+                (ipInt >>> 24) & 255,
+                (ipInt >>> 16) & 255,
+                (ipInt >>> 8) & 255,
+                ipInt & 255
+            ];
+
+            let globalBitIndex = 0;
+
+            octets.forEach((val, octetIdx) => {
+                const octetBox = document.createElement('div');
+                octetBox.className = 'octet-box';
+
+                const title = document.createElement('div');
+                title.className = 'octet-title';
+                title.textContent = `Oktet ${octetIdx + 1}: ${val}`;
+                octetBox.appendChild(title);
+
+                const strip = document.createElement('div');
+                strip.className = 'bit-strip';
+
+                const binStr = val.toString(2).padStart(8, '0');
+                for (let b = 0; b < 8; b++) {
+                    const bitElem = document.createElement('div');
+                    const isNetBit = globalBitIndex < cidr;
+                    bitElem.className = `bit-cell ${isNetBit ? 'bit-net' : 'bit-host'}`;
+                    bitElem.textContent = binStr[b];
+                    bitElem.title = `Bit ${globalBitIndex + 1}: ${isNetBit ? 'Network' : 'Host'}`;
+                    strip.appendChild(bitElem);
+                    globalBitIndex++;
+                }
+
+                octetBox.appendChild(strip);
+                octetVisualizer.appendChild(octetBox);
+            });
+        }
+
+        // Update opsi pemecahan subnet
+        function updateSubdividerOptions(currentCidr, networkInt) {
+            const savedSubdivide = parseInt(subdivideSelect.value, 10);
+            subdivideSelect.innerHTML = '';
+
+            if (currentCidr >= 30) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "Tidak dapat dibagi lagi";
+                subdivideSelect.appendChild(opt);
+                document.getElementById('subnetTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 1.5rem;">Ukuran prefix saat ini sudah terlalu kecil untuk dipecah lagi.</td></tr>';
+                return;
+            }
+
+            const maxCidr = Math.min(30, currentCidr + 6); // Batasi maksimum agar tabel tidak ribuan baris
+            for (let c = currentCidr + 1; c <= maxCidr; c++) {
+                const opt = document.createElement('option');
+                opt.value = c;
+                const subnetsCount = Math.pow(2, c - currentCidr);
+                opt.textContent = `/${c} (${subnetsCount} subnet, ${Math.max(0, Math.pow(2, 32 - c) - 2)} host/subnet)`;
+                subdivideSelect.appendChild(opt);
+            }
+
+            // Atur default
+            if (savedSubdivide && savedSubdivide > currentCidr && savedSubdivide <= maxCidr) {
+                subdivideSelect.value = savedSubdivide;
+            } else {
+                subdivideSelect.value = currentCidr + 1;
+            }
+
+            renderSubnetTable(currentCidr, parseInt(subdivideSelect.value, 10), networkInt);
+        }
+
+        // Render daftar tabel pecahan subnet
+        function renderSubnetTable(parentCidr, targetCidr, parentNetworkInt) {
+            const tbody = document.getElementById('subnetTableBody');
+            tbody.innerHTML = '';
+
+            if (isNaN(targetCidr) || targetCidr <= parentCidr) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-dim); padding: 1rem;">Pilih prefix tujuan yang lebih besar dari /' + parentCidr + '</td></tr>';
+                return;
+            }
+
+            const totalSubnets = Math.pow(2, targetCidr - parentCidr);
+            const subnetBlockSize = Math.pow(2, 32 - targetCidr);
+            const displayLimit = Math.min(totalSubnets, 64); // Render maksimal 64 entri demi performa browser
+
+            for (let i = 0; i < displayLimit; i++) {
+                const subNetInt = (parentNetworkInt + (i * subnetBlockSize)) >>> 0;
+                const subBroadcastInt = (subNetInt + subnetBlockSize - 1) >>> 0;
+                const usable = Math.max(0, subnetBlockSize - 2);
+
+                let rangeStr = "";
+                if (targetCidr === 31) {
+                    rangeStr = `${intToIp(subNetInt)} - ${intToIp(subBroadcastInt)}`;
+                } else if (targetCidr === 32) {
+                    rangeStr = intToIp(subNetInt);
+                } else {
+                    rangeStr = `${intToIp(subNetInt + 1)} - ${intToIp(subBroadcastInt - 1)}`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td style="color: var(--text-dim);">${i + 1}</td>
+                <td style="font-weight: 600; color: #60a5fa;">${intToIp(subNetInt)}/${targetCidr}</td>
+                <td>${rangeStr}</td>
+                <td style="color: #fbbf24;">${intToIp(subBroadcastInt)}</td>
+                <td style="color: #34d399;">${usable.toLocaleString('id-ID')}</td>
+            `;
+                tbody.appendChild(tr);
+            }
+
+            if (totalSubnets > displayLimit) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="5" style="text-align: center; color: var(--text-dim); padding: 0.75rem;">... Menampilkan ${displayLimit} dari ${totalSubnets} subnet untuk menjaga kecepatan rendering ...</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // Set Preset Helper
+        function setPreset(ip, cidr) {
+            ipInput.value = ip;
+            cidrSelect.value = cidr;
+            cidrRange.value = cidr;
+            cidrBadge.textContent = `/${cidr}`;
+            calculateSubnet();
+        }
+
+        // Salin Teks ke Clipboard
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.textContent = `Berhasil menyalin "${text}"`;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Gagal menyalin:', err);
+            });
+        }
+
+        // Event Listeners
+        populateCidrOptions();
+        cidrSelect.value = 24;
+
+        ipInput.addEventListener('input', calculateSubnet);
+
+        cidrSelect.addEventListener('change', () => {
+            cidrRange.value = cidrSelect.value;
+            cidrBadge.textContent = `/${cidrSelect.value}`;
+            calculateSubnet();
+        });
+
+        cidrRange.addEventListener('input', () => {
+            cidrSelect.value = cidrRange.value;
+            cidrBadge.textContent = `/${cidrRange.value}`;
+            calculateSubnet();
+        });
+
+        subdivideSelect.addEventListener('change', () => {
+            const ipStr = ipInput.value.trim();
+            if (isValidIpv4(ipStr)) {
+                const cidr = parseInt(cidrSelect.value, 10);
+                const maskInt = (0xFFFFFFFF << (32 - cidr)) >>> 0;
+                const networkInt = (ipToInt(ipStr) & maskInt) >>> 0;
+                renderSubnetTable(cidr, parseInt(subdivideSelect.value, 10), networkInt);
+            }
+        });
+
+        // Kalkulasi awal
+        calculateSubnet();
+    </script>
+
+</body>
+
+</html>
