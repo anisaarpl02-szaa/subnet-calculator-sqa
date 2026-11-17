@@ -936,89 +936,101 @@
             return { ipClass, typeText, tagClass };
         }
 
-        // Perhitungan Utama Subnet
-        function calculateSubnet() {
+        // Perhitungan Utama Subnet (Terhubung ke FastAPI /api/subnet)
+        let currentAbortController = null;
+
+        async function calculateSubnet() {
             const ipStr = ipInput.value.trim();
             const cidr = parseInt(cidrSelect.value, 10);
 
-            if (!isValidIpv4(ipStr)) {
-                ipError.style.display = 'block';
-                return;
+            if (currentAbortController) {
+                currentAbortController.abort();
             }
-            ipError.style.display = 'none';
+            currentAbortController = new AbortController();
 
-            const ipInt = ipToInt(ipStr);
-            const maskInt = cidr === 0 ? 0 : ((0xFFFFFFFF << (32 - cidr)) >>> 0);
-            const wildcardInt = (~maskInt) >>> 0;
-            const networkInt = (ipInt & maskInt) >>> 0;
-            const broadcastInt = (networkInt | wildcardInt) >>> 0;
+            try {
+                const response = await fetch(`/api/subnet?ip=${encodeURIComponent(ipStr)}&prefix=${cidr}`, {
+                    signal: currentAbortController.signal
+                });
 
-            const totalHosts = Math.pow(2, 32 - cidr);
-            let usableHosts = 0;
-            let firstHostInt = networkInt;
-            let lastHostInt = broadcastInt;
-            let rangeStr = "";
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: 'Format input tidak valid' }));
+                    ipError.textContent = errorData.detail || 'Terjadi kesalahan pada input.';
+                    ipError.style.display = 'block';
+                    return;
+                }
 
-            if (cidr === 32) {
-                usableHosts = 1;
-                firstHostInt = networkInt;
-                lastHostInt = networkInt;
-                rangeStr = intToIp(networkInt) + " (Host Tunggal)";
-            } else if (cidr === 31) {
-                // RFC 3021 Point-to-point links
-                usableHosts = 2;
-                firstHostInt = networkInt;
-                lastHostInt = broadcastInt;
-                rangeStr = `${intToIp(firstHostInt)} - ${intToIp(lastHostInt)} (RFC 3021 PTP)`;
-            } else {
-                usableHosts = Math.max(0, totalHosts - 2);
-                firstHostInt = networkInt + 1;
-                lastHostInt = broadcastInt - 1;
-                rangeStr = `${intToIp(firstHostInt)} - ${intToIp(lastHostInt)}`;
+                ipError.style.display = 'none';
+                const data = await response.json();
+
+                // Update Stat Cards dengan data dari API
+                document.getElementById('statNetwork').textContent = data.network;
+                document.getElementById('statBroadcast').textContent = data.broadcast ? data.broadcast : '- (Tidak ada)';
+
+                let rangeStr = "";
+                if (cidr === 32) {
+                    rangeStr = `${data.first_host} (Host Tunggal)`;
+                } else if (cidr === 31) {
+                    rangeStr = `${data.first_host} - ${data.last_host} (RFC 3021 PTP)`;
+                } else {
+                    rangeStr = `${data.first_host} - ${data.last_host}`;
+                }
+                document.getElementById('statHostRange').textContent = rangeStr;
+                document.getElementById('statUsableHosts').textContent = data.usable_hosts.toLocaleString('id-ID');
+                const totalHosts = Math.pow(2, 32 - cidr);
+                document.getElementById('statTotalHosts').textContent = `Dari total ${totalHosts.toLocaleString('id-ID')} alamat`;
+
+                // Update Rincian Tabel
+                const ipInt = ipToInt(ipStr);
+                const maskInt = cidr === 0 ? 0 : ((0xFFFFFFFF << (32 - cidr)) >>> 0);
+                const wildcardInt = (~maskInt) >>> 0;
+                const networkInt = ipToInt(data.network);
+
+                document.getElementById('detailIp').textContent = ipStr;
+                document.getElementById('detailIpBin').textContent = intToBinaryDotted(ipInt);
+
+                document.getElementById('detailMask').textContent = data.mask;
+                document.getElementById('detailMaskBin').textContent = intToBinaryDotted(maskInt);
+
+                document.getElementById('detailWildcard').textContent = intToIp(wildcardInt);
+                document.getElementById('detailWildcardBin').textContent = intToBinaryDotted(wildcardInt);
+
+                document.getElementById('detailCidrNetwork').textContent = `${data.network}/${cidr}`;
+                document.getElementById('detailNetworkBin').textContent = intToBinaryDotted(networkInt);
+
+                document.getElementById('detailBroadcast').textContent = data.broadcast ? data.broadcast : '- (Tidak ada)';
+                if (data.broadcast) {
+                    document.getElementById('detailBroadcastBin').textContent = intToBinaryDotted(ipToInt(data.broadcast));
+                } else {
+                    document.getElementById('detailBroadcastBin').textContent = '-';
+                }
+
+                document.getElementById('detailFirstHost').textContent = data.first_host;
+                document.getElementById('detailLastHost').textContent = data.last_host;
+
+                // Klasifikasi
+                const classification = getIpClassification(ipInt);
+                document.getElementById('detailClass').textContent = classification.ipClass;
+                const tagBadge = document.getElementById('detailTypeBadge');
+                tagBadge.textContent = classification.typeText;
+                tagBadge.className = `tag ${classification.tagClass}`;
+
+                document.getElementById('detailInteger').textContent = ipInt;
+                document.getElementById('detailHex').textContent = '0x' + ipInt.toString(16).toUpperCase().padStart(8, '0');
+
+                // Visualisasi 32-bit & Subdivide
+                renderBitVisualizer(ipInt, cidr);
+                updateSubdividerOptions(cidr, networkInt);
+            } catch (err) {
+                if (err.name === 'AbortError') return;
+                // Fallback jika dibuka langsung tanpa server (misal file://)
+                if (!isValidIpv4(ipStr)) {
+                    ipError.textContent = "Format IP tidak valid! Harap masukkan format 0.0.0.0 s/d 255.255.255.255";
+                    ipError.style.display = 'block';
+                    return;
+                }
+                ipError.style.display = 'none';
             }
-
-            // Update Stat Cards
-            document.getElementById('statNetwork').textContent = intToIp(networkInt);
-            document.getElementById('statBroadcast').textContent = intToIp(broadcastInt);
-            document.getElementById('statHostRange').textContent = rangeStr;
-            document.getElementById('statUsableHosts').textContent = usableHosts.toLocaleString('id-ID');
-            document.getElementById('statTotalHosts').textContent = `Dari total ${totalHosts.toLocaleString('id-ID')} alamat`;
-
-            // Update Detailed Table
-            document.getElementById('detailIp').textContent = ipStr;
-            document.getElementById('detailIpBin').textContent = intToBinaryDotted(ipInt);
-
-            const maskStr = intToIp(maskInt);
-            document.getElementById('detailMask').textContent = maskStr;
-            document.getElementById('detailMaskBin').textContent = intToBinaryDotted(maskInt);
-
-            document.getElementById('detailWildcard').textContent = intToIp(wildcardInt);
-            document.getElementById('detailWildcardBin').textContent = intToBinaryDotted(wildcardInt);
-
-            document.getElementById('detailCidrNetwork').textContent = `${intToIp(networkInt)}/${cidr}`;
-            document.getElementById('detailNetworkBin').textContent = intToBinaryDotted(networkInt);
-
-            document.getElementById('detailBroadcast').textContent = intToIp(broadcastInt);
-            document.getElementById('detailBroadcastBin').textContent = intToBinaryDotted(broadcastInt);
-
-            document.getElementById('detailFirstHost').textContent = (cidr >= 31) ? intToIp(firstHostInt) : intToIp(firstHostInt);
-            document.getElementById('detailLastHost').textContent = (cidr >= 31) ? intToIp(lastHostInt) : intToIp(lastHostInt);
-
-            // Classification
-            const classification = getIpClassification(ipInt);
-            document.getElementById('detailClass').textContent = classification.ipClass;
-            const tagBadge = document.getElementById('detailTypeBadge');
-            tagBadge.textContent = classification.typeText;
-            tagBadge.className = `tag ${classification.tagClass}`;
-
-            document.getElementById('detailInteger').textContent = ipInt;
-            document.getElementById('detailHex').textContent = '0x' + ipInt.toString(16).toUpperCase().padStart(8, '0');
-
-            // Update 32-bit Visualizer
-            renderBitVisualizer(ipInt, cidr);
-
-            // Update Subnet Subdivider Dropdown & List
-            updateSubdividerOptions(cidr, networkInt);
         }
 
         // Visualizer 32-bit (Network vs Host)
